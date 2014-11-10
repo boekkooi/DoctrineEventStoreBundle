@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="boekkooi.doctrine_event_store.event_store.class">Boekkooi\Bundle\DoctrineEventStoreBundle\Doctrine\EventStore</parameter>
+        <parameter key="boekkooi.doctrine_event_store.unit_of_work.class">Boekkooi\Bundle\DoctrineEventStoreBundle\Doctrine\UnitOfWork</parameter>
+    </parameters>
+    <services>
+        <service id="boekkooi.doctrine_event_store.event_store" class="%boekkooi.doctrine_event_store.event_store.class%" public="false">
+            <argument type="service" id="boekkooi.doctrine_event_store.storage"/>
+        </service>
+        <service id="boekkooi.doctrine_event_store.unit_of_work" class="%boekkooi.doctrine_event_store.unit_of_work.class%">
+            <argument type="service" id="boekkooi.doctrine_event_store.event_store"/>
+            <argument type="service" id="boekkooi.doctrine_event_store.event_dispatcher"/>
+        </service>
+    </services>
+</container>

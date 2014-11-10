@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<serializer>
+    <class name="Boekkooi\Bundle\DoctrineEventStoreBundle\Model\EventSource" exclusion-policy="ALL">
+        <property name="id" expose="true" type="Rhumsaa\Uuid\Uuid"
+                  accessor-getter="getId">
+        </property>
+    </class>
+</serializer>

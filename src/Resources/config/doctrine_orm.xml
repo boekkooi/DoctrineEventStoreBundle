@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="boekkooi.doctrine_event_store.model.class">Boekkooi\Bundle\DoctrineEventStoreBundle\Model\Event</parameter>
+        <parameter key="boekkooi.doctrine_event_store.storage.class">Boekkooi\Bundle\DoctrineEventStoreBundle\Doctrine\ORM\Storage</parameter>
+        <parameter key="boekkooi.doctrine_event_store.listener_resolver.class">Boekkooi\Bundle\DoctrineEventStoreBundle\Doctrine\ORM\EventListener\EventSourceListenerResolver</parameter>
+        <parameter key="boekkooi.doctrine_event_store.listener.class">Boekkooi\Bundle\DoctrineEventStoreBundle\Doctrine\ORM\EventListener\EventSourceListener</parameter>
+    </parameters>
+    <services>
+        <service id="boekkooi.doctrine_event_store.model.event_manager"
+                 class="%doctrine.orm.entity_manager.class%"
+                 factory-method="getManagerForClass"
+                 factory-service="doctrine"
+                 public="false">
+            <argument>%boekkooi.doctrine_event_store.model.class%</argument>
+        </service>
+        <service id="boekkooi.doctrine_event_store.model.event_repository"
+                 class="Doctrine\Common\Persistence\ObjectRepository"
+                 factory-method="getRepository"
+                 factory-service="boekkooi.doctrine_event_store.model.event_manager"
+                 public="false">
+            <argument>%boekkooi.doctrine_event_store.model.class%</argument>
+        </service>
+        <service id="boekkooi.doctrine_event_store.storage" class="%boekkooi.doctrine_event_store.storage.class%" public="false">
+            <argument type="service" id="boekkooi.doctrine_event_store.model.event_manager"/>
+            <argument type="service" id="boekkooi.doctrine_event_store.model.event_repository"/>
+            <argument type="service" id="jms_serializer"/>
+        </service>
+
+        <service id="boekkooi.doctrine_event_store.listener_resolver" class="%boekkooi.doctrine_event_store.listener_resolver.class%">
+            <argument type="service" id="service_container"/>
+        </service>
+        <service id="boekkooi.doctrine_event_store.listener" class="%boekkooi.doctrine_event_store.listener.class%">
+            <argument type="service" id="service_container"/>
+            <tag name="doctrine.event_subscriber"/>
+        </service>
+    </services>
+</container>
