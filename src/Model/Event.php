@@ -39,7 +39,7 @@ class Event
     private $data;
 
     /**
-     * @var string
+     * @var float
      */
     protected $createdAt;
 
@@ -51,7 +51,7 @@ class Event
         $this->event = $event;
         $this->eventType = $eventType;
         $this->data = $data;
-        $this->createdAt = new \DateTime();
+        $this->createdAt = microtime(true);
     }
 
     /**
@@ -109,6 +109,6 @@ class Event
      */
     public function getCreatedAt()
     {
-        return $this->createdAt;
+        return (new \DateTime())->setTimeStamp($this->createdAt);
     }
 }

@@ -21,7 +21,7 @@
 
         <field name="data" column="event_data" type="text" nullable="false" />
 
-        <field name="createdAt" column="created_at" type="datetime" nullable="false" />
+        <field name="createdAt" column="created_at" type="float" nullable="false" />
     </entity>
 
 </doctrine-mapping>
