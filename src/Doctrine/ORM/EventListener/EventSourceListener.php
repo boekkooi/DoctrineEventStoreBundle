@@ -53,7 +53,12 @@ class EventSourceListener implements EventSubscriber
     {
         /** @var ClassMetadataInfo $metadata */
         $metadata = $event->getClassMetadata();
-        if (!$metadata->isMappedSuperclass && $metadata->getReflectionClass()->isSubclassOf($this->eventSourceClass)) {
+        if ($metadata->isMappedSuperclass) {
+            return;
+        }
+
+        $refl = $metadata->getReflectionClass();
+        if ($refl !== null && $refl->isSubclassOf($this->eventSourceClass)) {
             $metadata->addEntityListener(Events::preRemove, __CLASS__, 'preRemoveHandler');
             $metadata->addEntityListener(Events::preFlush, __CLASS__, 'preFlushHandler');
             $metadata->addEntityListener(Events::postLoad, __CLASS__, 'postLoadHandler');
