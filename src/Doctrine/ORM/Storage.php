@@ -6,8 +6,8 @@ use Boekkooi\Bundle\DoctrineEventStoreBundle\DomainEvent;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\Helper\EventName;
 
 use Boekkooi\Bundle\DoctrineEventStoreBundle\Serializer\Exclusion\DomainEventExclusion;
-use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Rhumsaa\Uuid\Uuid;
@@ -22,7 +22,7 @@ class Storage implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\St
      */
     private $manager;
     /**
-     * @var ObjectRepository
+     * @var EntityRepository
      */
     private $repository;
     /**
@@ -30,7 +30,7 @@ class Storage implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\St
      */
     private $serializer;
 
-    public function __construct(EntityManager $manager, ObjectRepository $repository, SerializerInterface $serializer)
+    public function __construct(EntityManager $manager, EntityRepository $repository, SerializerInterface $serializer)
     {
         $this->manager = $manager;
         $this->repository = $repository;
@@ -72,13 +72,16 @@ class Storage implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\St
      */
     public function findCurrentVersion(Uuid $id, $className)
     {
-        /** @var Event[] $res */
-        $res = $this->repository->findBy(array('eventSourceId' => $id, 'eventSourceType' => $className), array('version' => 'DESC'), 1);
+        $query = $this->repository->createNamedQuery('current_version');
+        $query->execute(
+            array('eventSourceId' => $id, 'eventSourceType' => $className),
+            $query::HYDRATE_SCALAR
+        );
+
         if (empty($res)) {
             return 0;
         }
-
-        return $res[0]->getVersion();
+        return $res[0];
     }
 
     /**

@@ -9,6 +9,10 @@
             <index columns="source_id,source_type"/>
         </indexes>
 
+        <named-queries>
+            <named-query name="current_version" query="SELECT e.version FROM __CLASS__ e WHERE e.eventSourceId = :eventSourceId AND e.eventSourceType = :eventSourceType ORDER BY e.version DESC"/>
+        </named-queries>
+
         <id name="eventSourceId" column="source_id" type="uuid" />
 
         <id name="version" column="version" type="integer" />
