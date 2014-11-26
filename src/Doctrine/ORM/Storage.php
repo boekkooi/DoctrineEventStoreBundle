@@ -73,15 +73,14 @@ class Storage implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\St
     public function findCurrentVersion(Uuid $id, $className)
     {
         $query = $this->repository->createNamedQuery('current_version');
-        $query->execute(
-            array('eventSourceId' => $id, 'eventSourceType' => $className),
-            $query::HYDRATE_SCALAR
-        );
+        $query->setParameter('eventSourceId', $id, 'uuid');
+        $query->setParameter('eventSourceType', $className, 'string');
+        $res = $query->getScalarResult();
 
         if (empty($res)) {
             return 0;
         }
-        return $res[0];
+        return intval($res[0]['version']);
     }
 
     /**
