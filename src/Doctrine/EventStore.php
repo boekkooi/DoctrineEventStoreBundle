@@ -24,25 +24,6 @@ class EventStore implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore
         $this->storage = $storage;
     }
 
-    public function initialize(Uuid $id, $className)
-    {
-        $version = $this->storage->findCurrentVersion($id, $className);
-        if ($version === null) {
-            throw new EventStreamNotFoundException(sprintf(
-                "No event stream found for %s with id %s",
-                $id,
-                $className
-            ));
-        }
-
-        return new EventStream(
-            $className,
-            $id,
-            array(),
-            $version
-        );
-    }
-
     /**
      * Commit the event stream to persistence.
      *

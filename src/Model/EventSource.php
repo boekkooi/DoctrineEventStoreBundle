@@ -18,6 +18,11 @@ abstract class EventSource implements \Boekkooi\Bundle\DoctrineEventStoreBundle\
     private $id;
 
     /**
+     * @var int
+     */
+    private $eventVersion = 0;
+
+    /**
      * @var DomainEvent[]
      */
     private $events = array();
@@ -37,6 +42,25 @@ abstract class EventSource implements \Boekkooi\Bundle\DoctrineEventStoreBundle\
         }
 
         return $this->id;
+    }
+
+    /**
+     * @return int
+     */
+    final public function getEventVersion()
+    {
+        return $this->eventVersion;
+    }
+
+    /**
+     * @return DomainEvent[]
+     */
+    final public function pullDomainEvents()
+    {
+        $events = $this->events;
+        $this->events = array();
+
+        return $events;
     }
 
     protected function apply(DomainEvent $event)
@@ -60,13 +84,5 @@ abstract class EventSource implements \Boekkooi\Bundle\DoctrineEventStoreBundle\
         }
 
         $this->$method($event);
-    }
-
-    public function pullDomainEvents()
-    {
-        $events = $this->events;
-        $this->events = array();
-
-        return $events;
     }
 }

@@ -10,15 +10,6 @@ use Rhumsaa\Uuid\Uuid;
 interface EventStore
 {
     /**
-     * @throws EventStreamNotFoundException Thrown when no EventStream can be found.
-     * @param Uuid $id
-     * @param string $className
-     * @return EventStream
-     *
-     */
-    public function initialize(Uuid $id, $className);
-
-    /**
      * Commit the event stream to persistence.
      *
      * @param EventStream $stream

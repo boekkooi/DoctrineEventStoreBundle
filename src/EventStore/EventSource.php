@@ -11,6 +11,11 @@ interface EventSource
     public function getId();
 
     /**
+     * @return int
+     */
+    public function getEventVersion();
+
+    /**
      * @return DomainEvent[]
      */
     public function pullDomainEvents();

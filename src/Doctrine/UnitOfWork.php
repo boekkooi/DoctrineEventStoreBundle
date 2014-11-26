@@ -42,13 +42,6 @@ final class UnitOfWork
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function initialize(EventSource $object)
-    {
-        $id = (string) $object->getId();
-
-        $this->streams[$id] = $this->eventStore->initialize($object->getId(), get_class($object));
-    }
-
     /**
      * @param EventSource $object
      * @return void
@@ -62,7 +55,7 @@ final class UnitOfWork
                 get_class($object),
                 $object->getId(),
                 array(),
-                0
+                $object->getEventVersion()
             );
         }
 

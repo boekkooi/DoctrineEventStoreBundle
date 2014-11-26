@@ -61,13 +61,7 @@ class EventSourceListener implements EventSubscriber
         if ($refl !== null && $refl->isSubclassOf($this->eventSourceClass)) {
             $metadata->addEntityListener(Events::preRemove, __CLASS__, 'preRemoveHandler');
             $metadata->addEntityListener(Events::preFlush, __CLASS__, 'preFlushHandler');
-            $metadata->addEntityListener(Events::postLoad, __CLASS__, 'postLoadHandler');
         }
-    }
-
-    public function postLoadHandler(EventSource $object)
-    {
-        $this->getUnitOfWork()->initialize($object);
     }
 
     public function preRemoveHandler(EventSource $object, LifecycleEventArgs $event)

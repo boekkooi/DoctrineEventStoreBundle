@@ -6,6 +6,8 @@
 
     <mapped-superclass name="Boekkooi\Bundle\DoctrineEventStoreBundle\Model\EventSource">
         <id name="id" column="id" type="uuid" />
+
+        <field name="eventVersion" column="event_version" type="integer" nullable="false" />
     </mapped-superclass>
 
 </doctrine-mapping>

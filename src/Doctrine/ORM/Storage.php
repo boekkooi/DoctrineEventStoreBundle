@@ -1,6 +1,7 @@
 <?php
 namespace Boekkooi\Bundle\DoctrineEventStoreBundle\Doctrine\ORM;
 
+use Boekkooi\Bundle\DoctrineEventStoreBundle\Exception\LogicException;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\Model\Event;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\DomainEvent;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\Helper\EventName;
@@ -54,6 +55,14 @@ class Storage implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\St
     {
         $storeEvent = new Event($id, $className, $nextVersion, new EventName($event), get_class($event), $this->serialize($event));
         $this->manager->persist($storeEvent);
+
+        // Increment the version number
+        $source = $this->manager->getUnitOfWork()->getByIdHash((string) $id, $className);
+        if ($source === false) {
+            throw new LogicException('Can\'t store events when the entity is not know to doctrine');
+        }
+        $this->manager->getClassMetadata($className)->getReflectionProperty('eventVersion')
+            ->setValue($source, $nextVersion);
 
         // Dirty trick to fix problems with the event listener
         $this->manager->getUnitOfWork()->computeChangeSet(
