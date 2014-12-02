@@ -51,8 +51,9 @@ final class UnitOfWork
         $id = (string) $object->getId();
 
         if (!isset($this->streams[$id])) {
+            $objectClass = ($object instanceof Proxy ? get_parent_class($object) : get_class($object));
             $this->streams[$id] = new EventStream(
-                get_class($object),
+                $objectClass,
                 $object->getId(),
                 array(),
                 $object->getEventVersion()

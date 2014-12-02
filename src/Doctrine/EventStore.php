@@ -37,7 +37,13 @@ class EventStore implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore
         $currentVersion = intval($stream->getVersion());
         $actualVersion = $this->storage->findCurrentVersion($id, $stream->getClassName());
         if ($actualVersion !== $currentVersion) {
-            throw new ConcurrencyException();
+            throw new ConcurrencyException(sprintf(
+                'Invalid version for %s::%s, expected %s got %s',
+                $stream->getClassName(),
+                $id,
+                $currentVersion,
+                $actualVersion
+            ));
         }
 
         $newEvents = $stream->newEvents();
