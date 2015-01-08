@@ -8,6 +8,7 @@ use Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\EventStream;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\Transaction;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\Helper\EventName;
 
+use Doctrine\Common\Persistence\Proxy;
 use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
