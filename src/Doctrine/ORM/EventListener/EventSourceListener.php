@@ -53,15 +53,13 @@ class EventSourceListener implements EventSubscriber
     {
         /** @var ClassMetadataInfo $metadata */
         $metadata = $event->getClassMetadata();
-        if ($metadata->isMappedSuperclass) {
+        $refl = $metadata->getReflectionClass();
+        if ($refl === null || !$refl->isSubclassOf($this->eventSourceClass)) {
             return;
         }
-
-        $refl = $metadata->getReflectionClass();
-        if ($refl !== null && $refl->isSubclassOf($this->eventSourceClass)) {
-            $metadata->addEntityListener(Events::preRemove, __CLASS__, 'preRemoveHandler');
-            $metadata->addEntityListener(Events::preFlush, __CLASS__, 'preFlushHandler');
-        }
+        
+        $this->registerEventListener($metadata, Events::preRemove, 'preRemoveHandler');
+        $this->registerEventListener($metadata, Events::preFlush, 'preFlushHandler');
     }
 
     public function preRemoveHandler(EventSource $object, LifecycleEventArgs $event)
@@ -121,5 +119,25 @@ class EventSourceListener implements EventSubscriber
         }
 
         return $this->eventSourceReflection->getValue($object);
+    }
+    
+    protected function registerEventListener(ClassMetadataInfo $metadata, $eventName, $method)
+    {
+        $class = $metadata->fullyQualifiedClassName(__CLASS__);
+
+        // Check if the event listener is not already registered
+        $listener = array(
+            'class'  => $class,
+            'method' => $method
+        );
+        if (
+            isset($metadata->entityListeners[$eventName]) &&
+            in_array($listener, $metadata->entityListeners[$eventName])
+        ) {
+            return;
+        }
+
+        // Register listener
+        $metadata->addEntityListener($eventName, $class, $method);
     }
 }
