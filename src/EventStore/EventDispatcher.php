@@ -1,6 +1,7 @@
 <?php
 namespace Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 
