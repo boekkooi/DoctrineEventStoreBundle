@@ -4,12 +4,10 @@ namespace Boekkooi\Bundle\DoctrineEventStoreBundle\Doctrine\ORM\EventListener;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\EventSource;
 use Boekkooi\Bundle\DoctrineEventStoreBundle\Exception\RuntimeException;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Boekkooi\Bundle\DoctrineEventStoreBundle\Model\Event;
 
 /**
  * @author Warnar Boekkooi <warnar@boekkooi.net>
@@ -26,10 +24,7 @@ class EventSourceListener implements EventSubscriber
      */
     private $eventSourceClass;
 
-    /**
-     * @var \ReflectionProperty
-     */
-    private $eventSourceReflection;
+    private $changes = array();
 
     public function __construct(ContainerInterface $container)
     {
@@ -57,40 +52,39 @@ class EventSourceListener implements EventSubscriber
         if ($refl === null || !$refl->isSubclassOf($this->eventSourceClass)) {
             return;
         }
-        
-        $this->registerEventListener($metadata, Events::preRemove, 'preRemoveHandler');
+
         $this->registerEventListener($metadata, Events::preFlush, 'preFlushHandler');
+        $this->registerEventListener($metadata, Events::preRemove, 'preRemoveHandler');
+        $this->registerEventListener($metadata, Events::postRemove, 'postRemoveHandler');
     }
 
-    public function preRemoveHandler(EventSource $object, LifecycleEventArgs $event)
+    public function preFlushHandler(EventSource $object)
     {
-        $this->getUnitOfWork()->save($object);
+        unset($this->changes[spl_object_hash($object)]);
 
-        $events = $this->getEventSourceEvents($object, $event);
-        if (count($events) > 0) {
+        if ($this->getUnitOfWork()->save($object) > 0) {
+            $this->changes[spl_object_hash($object)] = true;
+            return;
+        }
+    }
+
+    public function preRemoveHandler(EventSource $object)
+    {
+        if ($this->getUnitOfWork()->save($object) > 0) {
+            $this->changes[spl_object_hash($object)] = true;
             return;
         }
 
-        /** @var \Doctrine\ORM\EntityManager $em */
-        $em = $event->getObjectManager();
-        $insertions = $em->getUnitOfWork()->getScheduledEntityInsertions();
-        foreach ($insertions as $insertion) {
-            if (!$insertion instanceof Event) {
-                continue;
-            }
-            // So there is a event in the unit of work well done.
-            // Thank you doctrine orphan order :|
-            if ($insertion->getEventSourceId() === $object->getId()) {
-                return;
-            }
+        if (isset($this->changes[spl_object_hash($object)])) {
+            return;
         }
 
         throw new RuntimeException('Unable to remove domain model, no removal event was found.');
     }
 
-    public function preFlushHandler(EventSource $object)
+    public function postRemoveHandler(EventSource $object)
     {
-        $this->getUnitOfWork()->save($object);
+        unset($this->changes[spl_object_hash($object)]);
     }
 
     public function postFlush()
@@ -106,21 +100,6 @@ class EventSourceListener implements EventSubscriber
         return $this->container->get('boekkooi.doctrine_event_store.unit_of_work');
     }
 
-    protected function getEventSourceEvents($object, LifecycleEventArgs $event)
-    {
-        if ($this->eventSourceReflection === null) {
-            $reflection = $event->getObjectManager()
-                ->getClassMetadata($this->eventSourceClass)
-                ->getReflectionClass()
-                ->getProperty('events');
-            $reflection->setAccessible(true);
-
-            $this->eventSourceReflection = $reflection;
-        }
-
-        return $this->eventSourceReflection->getValue($object);
-    }
-    
     protected function registerEventListener(ClassMetadataInfo $metadata, $eventName, $method)
     {
         $class = $metadata->fullyQualifiedClassName(__CLASS__);

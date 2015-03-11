@@ -45,7 +45,7 @@ final class UnitOfWork
 
     /**
      * @param EventSource $object
-     * @return void
+     * @return int The amount of new events saved
      */
     public function save(EventSource $object)
     {
@@ -61,10 +61,14 @@ final class UnitOfWork
             );
         }
 
+        $events = $object->pullDomainEvents();
+
         $eventStream = $this->streams[$id];
-        $eventStream->addEvents($object->pullDomainEvents());
+        $eventStream->addEvents($events);
 
         $this->transactions[$id] = $this->eventStore->commit($eventStream);
+
+        return count($events);
     }
 
     public function dispatch()
