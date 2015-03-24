@@ -19,7 +19,7 @@ matrix:
 before_script:
   - travis_retry composer self-update
   - if [[ "$SYMFONY_VERSION" != "" ]]; then composer require --no-update symfony/framework-bundle=$SYMFONY_VERSION; fi;
-  - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction
+  - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction --prefer-source
   - mkdir -p build/logs
 
 script:
