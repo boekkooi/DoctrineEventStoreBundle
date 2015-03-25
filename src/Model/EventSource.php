@@ -9,7 +9,7 @@ use Rhumsaa\Uuid\Uuid;
  */
 abstract class EventSource implements \Boekkooi\Bundle\DoctrineEventStoreBundle\EventStore\EventSource
 {
-    use EventSourceEventMethods
+    use EventSourceEventMethods;
 
     /**
      * @var \Rhumsaa\Uuid\Uuid
